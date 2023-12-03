@@ -1,5 +1,4 @@
 const { input: lines } = require("./input");
-const fs = require('fs');
 
 const partNumberMap = new Map();
 const numbersAtRow = [];
