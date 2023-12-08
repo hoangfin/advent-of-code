@@ -8,26 +8,17 @@ for (i = 2; i < lines.length; i++) {
 	network[node] = [nodeLeft, nodeRight];
 }
 
-// console.log(network);
-
-const start = lines[2].match(/[A-Z]+/)[0];
-const end = lines.at(-1).match(/[A-Z]+/)[0];
 let steps = 0;
 
-const move = (currentNode, end) => {
-	if (currentNode === end) {
-		return;
-	}
-	const [nodeLeft, nodeRight] = network[currentNode];
+let currentNode = "AAA";
+while (currentNode !== "ZZZ") {
 	const instruction = INSTRUCTION[steps % INSTRUCTION.length];
-	console.log(instruction, nodeLeft, nodeRight);
 	steps++;
 	if (instruction === 'L') {
-		move(nodeLeft, end);
+		currentNode = network[currentNode][0];
 	} else {
-		move(nodeRight, end);
+		currentNode = network[currentNode][1];
 	}
-};
+}
 
-move(start, end);
 console.log(steps);
