@@ -15,7 +15,6 @@ const [startRow, startCol] = (() => {
 	return [undefined, undefined];
 })();
 
-
 const deepCopy = originalArray => {
     return originalArray.map(innerArray => Array.isArray(innerArray) ? deepCopy(innerArray) : innerArray);
 };
@@ -25,17 +24,11 @@ const findFarthestLoop = (sketch, startRow, startCol) => {
 		{ length: sketch.length },
 		() => new Array(sketch[0].length).fill(false)
 	);
-	let max 
+	const dict = {};
 
-	const isValidMove = (sketch, row, col) => {
-		if (row < 0 || row >= sketch.length || col < 0 || col >= sketch[0].length || visited[row][col]) {
+	const isValid = (sketch, row, col, prevRow, prevCol) => {
+		if (row < 0 || row >= sketch.length || col < 0 || col >= sketch[0].length) {
 			return false;
-		}
-
-		switch (sketch[row][col]) {
-			case '.':
-				return false;
-			case ''
 		}
 
 		if (sketch[row][col] === '.') {
@@ -68,24 +61,42 @@ const findFarthestLoop = (sketch, startRow, startCol) => {
 		return true;
 	};
 
-	const move = (sketch, row, col) => {
-		if (sketch[row][col] === 'S') {
-			console.log("End here");
-			return true;
-		}
-
-		if (isValidMove(sketch, row, col)) {
-			visited[row][col] = true;
-			for (const neighbour of [[row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]]) {
-				move(sketch, neighbour[0], neighbour[1]);
+	const move = (sketch, startRow, startCol) => {
+		const stack = [];
+		stack.push([startRow, startCol, 0]);
+		while (stack.length > 0) {
+			const [row, col, depth] = stack.pop();
+			if (!visited[row][col]) {
+				visited[row][col] = true;
+				console.log("depth = " + depth);
+				if (!dict[`r${row}c${col}`]) {
+					dict[`r${row}c${col}`] = depth;
+				} else if (dict[`r${row}c${col}`] < depth) {
+					dict[`r${row}c${col}`] = depth;
+				}
+				for (const neighbour of [[row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]]) {
+					if (
+						isValid(sketch, neighbour[0], neighbour[1], row, col) &&
+						!visited[neighbour[0]][neighbour[1]]
+					) {
+						stack.push([...neighbour, depth + 1]);
+					}
+				}
 			}
 		}
-
-		return false;
 	};
 
 	move(sketch, startRow, startCol);
 
+	const validNodes = [
+		[startRow - 1, startCol],
+		[startRow + 1, startCol],
+		[startRow, startCol - 1],
+		[startRow, startCol + 1]
+	].filter(sketchNode => isValid(sketch, sketchNode[0], sketchNode[1], startRow, startCol));
+
+	console.log(validNodes);
+	validNodes.forEach(node => console.log(Math.round(dict[`r${node[0]}c${node[1]}`] / 2)));
 };
 
 const allSolutions = findFarthestLoop(sketch, startRow, startCol);
