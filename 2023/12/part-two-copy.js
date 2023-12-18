@@ -1,57 +1,58 @@
 const { input: lines } = require("./input");
 
-const records = lines.reduce((acc, line) => {
-	const [pattern, code] = line.split(" ");
-	acc.push([
-		pattern,
-		code.split(",").map(number => parseInt(number))
-	]);
-	return acc;
-}, []);
+const sum = (a, b) => a + b;
 
-// console.log(records);
+const cache = new Map();
+const _countWays = (row, ns) => {
+	console.log(row)
+    row = row.replace(/^\.+|\.+$/, '');
+	console.log("replaced = ", row);
+    if (row === '') return ns.length ? 0 : 1;
+    if (!ns.length) return row.includes('#') ? 0 : 1;
+    const key = [row, ns].join(' ');
+	// console.log(row, "|", key);
+    if (cache.has(key)) return cache.get(key);
 
-const isValidArrangement = (pattern, damagedSprings) => {
-	const damagedSymbols = pattern.match(/#+/g);
-		if (damagedSymbols.length !== damagedSprings.length) {
-			return false;
-		}
-		for (let i = 0; i < damagedSymbols.length; i++) {
-			if (damagedSymbols[i].length !== damagedSprings[i]) {
-				return false;
-			}
-		}
-		return true;
-}
-
-const countArrangements = record => {
-	const [pattern, damagedSprings] = record;
-	let arrangementsCount = 0;
-	const unknownSprings = pattern.match(/\?/g);
-
-	for (let i = 0; i < Math.pow(2, unknownSprings.length); i++) {
-		let binary = i.toString(2).padStart(unknownSprings.length, '0');
-		const testPattern = pattern.replace(/\?/g, () => {
-			const prevBinary = binary;
-			binary = binary.slice(1);
-			return prevBinary[0] === '1' ? '#' : '.';
-		});
-		if (isValidArrangement(testPattern, damagedSprings)) {
-			arrangementsCount++;
-		}
-	}
-
-	return arrangementsCount;
+    let result = 0;
+    const damaged = row.match(/^#+(?=\.|$)/);
+	// console.log(damaged);
+    if (damaged) {
+        if (damaged[0].length === ns[0]) {
+            result += _countWays(row.slice(ns[0]), ns.slice(1));
+        }
+    } else if (row.includes('?')) {
+        const total = ns.reduce(sum);
+        result += _countWays(row.replace('?', '.'), ns);
+        if ((row.match(/#/g) || []).length < total) {
+            result += _countWays(row.replace('?', '#'), ns);
+        }
+    }
+    // cache.set(key, result, damaged);
+    return result;
 };
 
-const findSumOfArrangements = records => {
-	let sum = 0;
-
-	records.forEach((record, i) => {
-		sum += countArrangements(record);
-	});
-
-	return sum;
+const countWays = (s) => {
+    const [row, ns] = s.split(' ');
+    return _countWays(row, ns.split(',').map(Number));
 };
 
-console.log(findSumOfArrangements(records));
+const unfold = (s) => {
+    const [row, records] = s.split(' ');
+    return [
+        [...Array(5)].fill(row).join('?'),
+        [...Array(5)].fill(records).join(',')
+    ].join(' ');
+};
+
+let t = performance.now();
+console.log(
+    'A',
+    lines.map(countWays).reduce(sum),
+    `took ${performance.now() - t}ms`
+);
+// t = performance.now();
+// console.log(
+//     'B',
+//     lines.map(unfold).map(countWays).reduce(sum),
+//     `took ${performance.now() - t}ms`
+// );

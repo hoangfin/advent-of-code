@@ -13,15 +13,18 @@ const records = lines.reduce((acc, line) => {
 
 const isValidArrangement = (pattern, damagedSprings) => {
 	const damagedSymbols = pattern.match(/#+/g);
-		if (damagedSymbols.length !== damagedSprings.length) {
+	if (!damagedSymbols) {
+		return false;
+	}
+	if (damagedSymbols.length !== damagedSprings.length) {
+		return false;
+	}
+	for (let i = 0; i < damagedSymbols.length; i++) {
+		if (damagedSymbols[i].length !== damagedSprings[i]) {
 			return false;
 		}
-		for (let i = 0; i < damagedSymbols.length; i++) {
-			if (damagedSymbols[i].length !== damagedSprings[i]) {
-				return false;
-			}
-		}
-		return true;
+	}
+	return true;
 }
 
 const countArrangements = record => {
@@ -40,7 +43,6 @@ const countArrangements = record => {
 			arrangementsCount++;
 		}
 	}
-	console.log(pattern, arrangementsCount);
 	return arrangementsCount;
 };
 
@@ -54,4 +56,6 @@ const findSumOfArrangements = records => {
 	return sum;
 };
 
+const t0 = performance.now();
 console.log(findSumOfArrangements(records));
+console.log(performance.now() - t0);
