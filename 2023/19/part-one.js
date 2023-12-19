@@ -2,13 +2,6 @@ const { input } = require("./input");
 
 const [workflowInput, partsInput] = input.split("\n\n");
 
-class Workflow {
-	constructor(name, rules) {
-		this.name = name;
-		this.rules = rules;
-	}
-}
-
 class Part {
 	constructor(x, m, a, s) {
 		this.x = x;
@@ -18,15 +11,16 @@ class Part {
 	}
 }
 
-const workflows = workflowInput.split("\n").reduce((acc, line) => {
+const process = (part, workflow) => {
+
+}
+
+const workflow = workflowInput.split("\n").reduce((acc, line) => {
 	const name = line.match(/^([^{}]+){/);
 	const rules = line.match(/^.*{(.+)}$/)[1].split(",");
-	// console.log(rules);
-	// console.log(defaultRule[1]);
-	// const workflow = new Workflow()
-	acc.push(new Workflow(name, rules));
+	acc.set(name[1], rules);
 	return acc;
-}, []);
+}, new Map());
 
 const parts = partsInput.split("\n").reduce((acc, line) => {
 	const [x, m, a, s] = line.match(/^{(.+)}$/)[1].split(",");
@@ -39,4 +33,12 @@ const parts = partsInput.split("\n").reduce((acc, line) => {
 	return acc;
 }, []);
 
-console.log(parts);
+// parts.forEach(part => {
+// 	process(part, workflow.get("in"));
+// });
+
+// console.log(workflow.get("in"));
+
+for (let i = 0; i < 1000; i++) {
+	console.log(i + 1);
+}

@@ -1,27 +1,34 @@
 const { input: lines } = require("./input");
 
-const graph = Array.from(lines, line => line.split(""));
-
-class CityBlock {
+class City {
 	constructor(row, col, heatLoss) {
 		this.parent = null;
 		this.row = row;
 		this.col = col;
 		this.heatLoss = heatLoss;
-		this.direction = "";
 		this.g = Infinity;
 		this.h = 0;
 		this.f = Infinity;
 	}
+
+	getNeighbors(graph) {
+
+	}
 }
+
+const graph = Array.from(lines, (line, row) => {
+	const cities = [];
+	const heatNums = line.split("");
+	heatNums.forEach((heatNum, col) => {
+		cities.push(new City(row, col, parseInt(heatNum)));
+	})
+	return cities;
+});
+
 
 const findLeastHeatLoss = (graph, startRow, startCol, endRow, endCol) => {
 
 	const calculateHeuristic = (row, col, endRow, endCol) => {
-		return Math.abs(row - endRow) + Math.abs(col - endCol);
-	};
-
-	const getNeighbors = (graph, currentCityBlock) => {
 		return Math.abs(row - endRow) + Math.abs(col - endCol);
 	};
 
@@ -31,24 +38,24 @@ const findLeastHeatLoss = (graph, startRow, startCol, endRow, endCol) => {
 	const heats = Array.from(graph, () => Array.from(graph[0]).fill(Infinity));
 	const prevs = Array.from(graph, () => []);
 
-	const cb = new CityBlock(startRow, startCol, graph[row][col]);
-	cb.g = 0;
-	cb.h = calculateHeuristic(startRow, startCol, endRow, endCol);
-	cb.f = cb.g + cb.h;
+	const start = graph[startRow][startCol];
+	start.g = 0;
+	start.h = calculateHeuristic(startRow, startCol, endRow, endCol);
+	start.f = start.g + start.h;
 
-	unvisited.push(cb);
+	unvisited.push(start);
 	while (unvisited.length > 0) {
-		const cityBlock = unvisited.pop(); // modify later
-		visited.push(cityBlock);
-		for (const neighbor in getNeighbors(graph, cityBlock)) {
-			if (visited.includes(neighbor)) {
+		const currentCity = unvisited.pop(); // modify later
+		visited.push(currentCity);
+		for (const neighbor of currentCity.getNeighbors(graph)) {
+			if (visited.includes(neighbor))
 				continue;
-			}
-			neighbor.parent = cityBlock;
-			const tentativeG = cityBlock.heatLoss + neighbor.heatLoss;
-			
-			if (!unvisited.includes(neighbor))
+			if (!unvisited.includes(neighbor)) {
+				neighbor.parent = currentCity;
+				const tentativeG = currentCity.g + neighbor.heatLoss;
+				if (tentativeG < neighbor.g)
 				unvisited.push(neighbor);
+			}
 		}
 	}
 };
