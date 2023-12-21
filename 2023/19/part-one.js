@@ -11,9 +11,16 @@ class Part {
 	}
 }
 
-const process = (part, workflow) => {
-
-}
+// const evaluatePart = (part, key, workflowMap) => {
+// 	const workflow = workflowMap.get(key);
+// 	workflow.
+// 	if (result === 'A') {
+// 		return part.values().reduce((acc, v) => acc + v, 0);
+// 	}
+// 	if (result === 'R') {
+// 		return 0;
+// 	}
+// };
 
 const workflow = workflowInput.split("\n").reduce((acc, line) => {
 	const name = line.match(/^([^{}]+){/);
@@ -34,11 +41,8 @@ const parts = partsInput.split("\n").reduce((acc, line) => {
 }, []);
 
 // parts.forEach(part => {
-// 	process(part, workflow.get("in"));
+// 	evaluatePart(part, workflow.get("in"))
 // });
 
+new Function(parts[0], "")
 // console.log(workflow.get("in"));
-
-for (let i = 0; i < 1000; i++) {
-	console.log(i + 1);
-}

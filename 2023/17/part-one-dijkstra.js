@@ -6,9 +6,7 @@ class City {
 		this.row = row;
 		this.col = col;
 		this.heatLoss = heatLoss;
-		this.g = Infinity;
-		this.h = 0;
-		this.f = Infinity;
+		this.actualHeatLoss = Infinity;
 	}
 
 	getNeighbors(graph) {
@@ -51,55 +49,54 @@ const graph = Array.from(lines, (line, row) => {
 	return cities;
 });
 
+// const q = [...graph];
+
+// console.log(q.length, "====", graph.length);
+// q.splice(1, 10);
+// console.log(q.length, "====", graph.length);
 const findLeastHeatLoss = (graph, startRow, startCol, endRow, endCol) => {
 
-	const calculateHeuristic = (row, col, endRow, endCol) => {
-		return Math.abs(row - endRow) + Math.abs(col - endCol);
-	};
-
-	const visited = [];
-	const unvisited = [];
+	const queue = graph.flat(Infinity);
 
 	const start = graph[startRow][startCol];
-	start.g = 0;
-	start.h = calculateHeuristic(startRow, startCol, endRow, endCol);
-	start.f = start.g + start.h;
+	start.actualHeatLoss = 0;
 
-	unvisited.push(start);
-	while (unvisited.length > 0) {
-		const currentCity = unvisited.reduce(
+	while (queue.length > 0) {
+		const currentCity = queue.reduce(
 			(acc, city) => {
-				if (city && city.f < acc.f) {
+				if (city && city.actualHeatLoss < acc.actualHeatLoss) {
 					acc = city;
 				}
 				return acc;
 			},
-			unvisited[0]
+			queue[0]
 		);
-		unvisited.splice(unvisited.indexOf(currentCity), 1);
+		queue.splice(queue.indexOf(currentCity), 1);
 		if (currentCity.row === endRow && currentCity.col === endCol) {
 			const path = buildPath(currentCity);
-			console.log(currentCity.g);
+			console.log(currentCity.actualHeatLoss);
 			// const heatLoss = path.reduce((acc, city) => acc + city.g, 0);
 			// return currentCity.g;
 		}
-		visited.push(currentCity);
-		for (const neighbor of currentCity.getNeighbors(graph)) {
-			if (visited.includes(neighbor))
-				continue;
-			if (!unvisited.includes(neighbor)) {
-				neighbor.parent = currentCity;
-				const tentativeG = currentCity.g + neighbor.heatLoss;
-				if (tentativeG < neighbor.g) {
-					neighbor.g = tentativeG;
-					neighbor.h = calculateHeuristic(neighbor.row, neighbor.col, endRow, endCol);
-					neighbor.f = neighbor.g + neighbor.h;
+		// console.log(Object.keys(currentCity));
+		// visited.push(currentCity);
+		if (currentCity) {
+			const neighbors = currentCity.getNeighbors(graph);
+			// console.log(neighbors);
+			if (neighbors.length > 0) {
+				for (const neighbor of neighbors) {
+					const tentativeHeatLoss = currentCity.actualHeatLoss + neighbor.heatLoss;
+					if (tentativeHeatLoss < neighbor.actualHeatLoss) {
+						neighbor.actualHeatLoss = tentativeHeatLoss;
+						neighbor.parent = currentCity;
+					}
 				}
-				unvisited.push(neighbor);
 			}
+
 		}
 	}
 };
 
 findLeastHeatLoss(graph, 0, 0, graph.length - 1, graph[0].length - 1);
 // console.log(heatLoss);
+// console.log(graph[1][1].getNeighbors(graph));
