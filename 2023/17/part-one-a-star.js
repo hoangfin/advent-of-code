@@ -1,5 +1,14 @@
 const { input: lines } = require("./input");
 
+const graph = Array.from(lines, line => line.split(""));
+
+const dir = {
+	UP: [-1, 0],
+	RIGHT: [0, 1],
+	DOWN: [1, 0],
+	LEFT: [0, -1]
+};
+
 class City {
 	constructor(row, col, heatLoss) {
 		this.parent = null;
@@ -12,24 +21,32 @@ class City {
 	}
 
 	getNeighbors(graph) {
-		if (this.parent?.parent?.row === this.parent?.row && this.parent?.row === this.row) {
-			return [
-				graph[this.row - 1] ? graph[this.row - 1][this.col] : undefined,
-				graph[this.row + 1] ? graph[this.row + 1][this.col] : undefined
-			].filter(city => city !== undefined);
+		const neighbors = [];
+		for (const [direction, [x, y]] of Object.entries(dir)) {
+			const heatLoss = graph[this.row + x]?.[this.col + y];
+			if (heatLoss) {
+				const neighbor = new City(this.row + x, this.col + y, direction, heatLoss);
+				neighbor.parent = this;
+				neighbor.g = this.g + parseInt(heatLoss);
+				if (this.direction === neighbor.direction) {
+					neighbor.steps = this.steps + 1;
+				}
+				neighbors.push(neighbor);
+			}
 		}
-		if (this.parent?.parent?.col === this.parent?.col && this.parent?.col === this.col) {
-			return [
-				graph[this.row] ? graph[this.row][this.col - 1] : undefined,
-				graph[this.row] ? graph[this.row][this.col + 1] : undefined
-			].filter(city => city !== undefined);
-		}
-		return [
-			graph[this.row - 1] ? graph[this.row - 1][this.col] : undefined,
-			graph[this.row + 1] ? graph[this.row + 1][this.col] : undefined,
-			graph[this.row] ? graph[this.row][this.col - 1] : undefined,
-			graph[this.row] ? graph[this.row][this.col + 1] : undefined
-		].filter(city => city !== undefined);
+		return neighbors
+				.filter(neighbor => neighbor.steps !== 4)
+				.filter(neighbor => {
+					if (dir[this.direction] === dir.UP)
+						return neighbor.direction !== "DOWN";
+					if (dir[this.direction] === dir.RIGHT)
+						return neighbor.direction !== "LEFT";
+					if (dir[this.direction] === dir.DOWN)
+						return neighbor.direction !== "UP";
+					if (dir[this.direction] === dir.LEFT)
+						return neighbor.direction !== "RIGHT";
+					return true;
+				});
 	}
 }
 
@@ -41,15 +58,6 @@ const buildPath = (currentCity) => {
 	}
 	return path;
 };
-
-const graph = Array.from(lines, (line, row) => {
-	const cities = [];
-	const heatNums = line.split("");
-	heatNums.forEach((heatNum, col) => {
-		cities.push(new City(row, col, parseInt(heatNum)));
-	})
-	return cities;
-});
 
 const findLeastHeatLoss = (graph, startRow, startCol, endRow, endCol) => {
 
@@ -77,16 +85,19 @@ const findLeastHeatLoss = (graph, startRow, startCol, endRow, endCol) => {
 			unvisited[0]
 		);
 		unvisited.splice(unvisited.indexOf(currentCity), 1);
+		visited.push(currentCity);
+		// console.log(visited.length, " ===== ", unvisited.length);
 		if (currentCity.row === endRow && currentCity.col === endCol) {
 			const path = buildPath(currentCity);
-			console.log(currentCity.g);
+			console.log(...path);
 			// const heatLoss = path.reduce((acc, city) => acc + city.g, 0);
 			// return currentCity.g;
 		}
-		visited.push(currentCity);
 		for (const neighbor of currentCity.getNeighbors(graph)) {
-			if (visited.includes(neighbor))
+			if (visited.includes(neighbor)) {
+				// console.log(neighbor, " included");
 				continue;
+			}
 			if (!unvisited.includes(neighbor)) {
 				neighbor.parent = currentCity;
 				const tentativeG = currentCity.g + neighbor.heatLoss;

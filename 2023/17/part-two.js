@@ -24,18 +24,29 @@ class Crucible {
 	getNeighbors(graph) {
 		const neighbors = [];
 		for (const [direction, [x, y]] of Object.entries(dir)) {
-			const heatLoss = graph[this.row + x]?.[this.col + y];
-			if (heatLoss) {
-				const neighbor = new Crucible(this.row + x, this.col + y, direction, parseInt(heatLoss));
-				neighbor.g = this.g + neighbor.heatLoss;
-				if (this.direction === neighbor.direction) {
-					neighbor.steps = this.steps + 1;
+			const row = (this.direction !== direction) ? (this.row + 4 * x ): (this.row + x);
+			const col = (this.direction !== direction) ? (this.col + 4 * y) : (this.col + y);
+			let heatLoss = 0;
+			// console.log(direction);
+			if (direction === "UP" || direction === "DOWN") {
+				for (let i = this.row; i !== row; i += x) {
+					heatLoss += parseInt(graph[i + x]?.[col]);
 				}
+			} else {
+				for (let i = this.col; i !== col; i += y) {
+					heatLoss += parseInt(graph[row]?.[i + y]);
+				}
+			}
+			// console.log(heatLoss);
+			if (heatLoss && !isNaN(heatLoss)) {
+				const neighbor = new Crucible(row, col, direction, parseInt(heatLoss));
+				neighbor.g = this.g + neighbor.heatLoss;
+				neighbor.steps = this.direction === neighbor.direction ? (this.steps + 1) : 4;
 				neighbors.push(neighbor);
 			}
 		}
 		return neighbors
-				.filter(neighbor => neighbor.steps !== 4)
+				.filter(neighbor => neighbor.steps >= 4 && neighbor.steps <= 10)
 				.filter(neighbor => {
 					if (dir[this.direction] === dir.UP)
 						return neighbor.direction !== "DOWN";
@@ -58,11 +69,11 @@ const findLeastHeatLoss = (graph, startRow, startCol, endRow, endCol) => {
 	const startCrucible = new Crucible(startRow, startCol, "", 0);
 	startCrucible.steps = 0;
 	startCrucible.g = 0;
+	// console.log(startCrucible.getNeighbors(graph));
 	minHeap.push(startCrucible);
 
 	while (minHeap.length > 0) {
 		const crucible = minHeap.pop();
-		// visited.set(`${crucible.row}-${crucible.col}-${crucible.direction}-${crucible.steps}`, crucible.g);
 		if (crucible.row === endRow && crucible.col === endCol) {
 			console.log(`Reached optimal path ${crucible.g}`);
 			break;
@@ -84,3 +95,5 @@ const findLeastHeatLoss = (graph, startRow, startCol, endRow, endCol) => {
 };
 
 findLeastHeatLoss(graph, 0, 0, graph.length - 1, graph[0].length - 1);
+
+
