@@ -90,15 +90,3 @@ const findEnergizedTiles = (graph, startRow, startCol, direction) => {
 const tiles = findEnergizedTiles(graph, 0, 0, RIGHT);
 
 console.log(tiles);
-// let total = 0;
-// energizedTiles.forEach(tiles => {
-// 	let sum = 0;
-// 	for (let i = 0; i < tiles.length; i++) {
-// 		if (tiles[i]) {
-// 			sum++;
-// 		}
-// 	}
-// 	total += sum;
-// });
-// console.log(total);
-// energizedTiles.forEach(tiles => console.log(...tiles));
