@@ -9,86 +9,30 @@ const direction = {
 	LEFT: [0, -1]
 };
 
-// const slopes = "^>v<";
-
-// class Tile {
-// 	constructor(x, y, value, direction, steps) {
-// 		this.x = x;
-// 		this.y = y;
-// 		this.value = value;
-// 		this.direction = direction;
-// 		this.steps = steps;
-// 	}
-
-// 	getNeighbors(graph) {
-// 		const tiles = [];
-// 		for (const [dir, [x, y]] of Object.entries(direction)) {
-// 			const value = graph[this.x + x]?.[this.y + y];
-// 			if (value === undefined || value === '#' || this.value === 'S') {
-// 				continue;
-// 			}
-// 			tiles.push(new Tile(this.x + x, this.y + y, value, dir, this.steps + 1));
-// 		}
-// 		return tiles
-// 				.filter(tile => {
-// 					if (this.direction === "UP")
-// 						return tile.direction !== "DOWN";
-// 					if (this.direction === "DOWN")
-// 						return tile.direction !== "UP";
-// 					if (this.direction === "RIGHT")
-// 						return tile.direction !== "LEFT";
-// 					if (this.direction === "LEFT")
-// 						return tile.direction !== "RIGHT";
-// 					return true;
-// 				})
-// 				.filter(tile => {
-// 					if (this.value === '^')
-// 						return tile.direction !== "DOWN";
-// 					if (this.value === 'v')
-// 						return tile.direction !== "UP";
-// 					if (this.value === '>')
-// 						return tile.direction !== "LEFT";
-// 					if (this.value === '<')
-// 						return tile.direction !== "RIGHT";
-// 					return true;
-// 				});
-// 	}
-// }
-
-// const findLongestPath = (graph, startX, startY, endX, endY, direction, steps) => {
-
-// 	const move = (graph, tile, endX, endY) => {
-
-// 		for (const nextPaths of getNextPaths(graph, row, col)) {
-
-// 		}
-// 	}
-
-// 	graph[startX][startY] = 'S';
-// 	const start = new Tile(startX, startY, graph[startX][startY], "", 0);
-// 	console.log(start.getNeighbors(graph));
-// 	// move(graph, start, endX, endY);
-// };
-
 const findLongestPath = (graph, startX, startY, endX, endY) => {
-	const queue = [];
-	const visited = Array.from({ length: graph.length }, () => []);
-	let longestHikeSteps = 0;
+	const visited = Array.from(
+		{ length: graph.length },
+		() => new Array(graph[0].length).fill('.')
+	);
+	let maxHikeSteps = 0;
 
-	queue.push([startX, startY, 0]);
-	while (queue.length > 0) {
-		const [x, y, steps] = queue.pop();
-		visited[x][y] = graph[x][y];
-		// console.log(visited);
-		if (x === endX && y === endY) {
-			if (longestHikeSteps > steps)
-				longestHikeSteps = steps;
+	const move = (graph, x, y, endX, endY, steps, visited) => {
+		if (x < 0 || x >= graph.length || y < 0 || y >= graph[0].length || visited[x][y] === 'O') {
+			return;
 		}
+
+		const tile = graph[x][y];
+		if (tile === '#') {
+			return;
+		}
+
+		visited[x][y] = 'O';
+		steps++;
+		if (x === endX && y === endY) {
+			return steps;
+		}
+
 		for (const [deltaX, deltaY] of Object.values(direction)) {
-			const tile = graph[x + deltaX]?.[y + deltaY];
-			if (tile === undefined || tile === '#' || visited[x + deltaX]?.[y + deltaY]) {
-				continue;
-			}
 			if (tile === '^' && deltaX === 1)
 				continue;
 			if (tile === 'v' && deltaX === -1)
@@ -97,11 +41,15 @@ const findLongestPath = (graph, startX, startY, endX, endY) => {
 				continue;
 			if (tile === '<' && deltaY === 1)
 				continue;
-			queue.push([x + deltaX, y + deltaY, steps + 1]);
-			console.log(queue.length);
+			move(graph, x+ deltaX, y + deltaY, endX, endY, steps, visited);
 		}
+		visited[x][y] = '.';
 	}
-	console.log(longestHikeSteps);
+
+	visited[startX][startY] = 'O';
+	move(graph, 1, 1, endX, endY, 0, visited);
+	visited[startX][startY] = false;
+	console.log(maxHikeSteps);
 }
 
 findLongestPath(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
