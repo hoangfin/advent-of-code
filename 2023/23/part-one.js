@@ -2,14 +2,14 @@ const { input: lines } = require("./input");
 
 const graph = Array.from(lines, line => line.split(""));
 
-const direction = {
+const DIRECTION = {
 	UP: [-1, 0],
 	DOWN: [1, 0],
 	RIGHT: [0, 1],
 	LEFT: [0, -1]
 };
 
-const findLongestPath = (graph, startX, startY, endX, endY) => {
+const backtrackMaxSteps = (graph, startX, startY, endX, endY) => {
 	const visited = Array.from(
 		{ length: graph.length },
 		() => new Array(graph[0].length).fill('.')
@@ -32,7 +32,7 @@ const findLongestPath = (graph, startX, startY, endX, endY) => {
 			return steps;
 		}
 
-		for (const [deltaX, deltaY] of Object.values(direction)) {
+		for (const [deltaX, deltaY] of Object.values(DIRECTION)) {
 			if (tile === '^' && deltaX === 1)
 				continue;
 			if (tile === 'v' && deltaX === -1)
@@ -52,5 +52,42 @@ const findLongestPath = (graph, startX, startY, endX, endY) => {
 	console.log(maxHikeSteps);
 }
 
-findLongestPath(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
-// console.log(graph[22][21]);
+const dfsMaxSteps = (graph, startX, startY, endX, endY) => {
+	const stack = [];
+	const results = [];
+	stack.push([startX, startY, "", 0]);
+	while (stack.length > 0) {
+		const [x, y, dir, steps] = stack.pop();
+		if (x === endX && y === endY) {
+			results.push(steps);
+			continue;
+		}
+		for (const [direction, [deltaX, deltaY]] of Object.entries(DIRECTION)) {
+			const tile = graph[x + deltaX]?.[y + deltaY];
+			if (tile === undefined || tile === '#') {
+				continue;
+			}
+			if (tile === '^' && deltaX === 1)
+				continue;
+			if (tile === 'v' && deltaX === -1)
+				continue;
+			if (tile === '>' && deltaY === -1)
+				continue;
+			if (tile === '<' && deltaY === 1)
+				continue;
+			if (dir === "UP" && direction === "DOWN")
+				continue;
+			if (dir === "DOWN" && direction === "UP")
+				continue;
+			if (dir === "RIGHT" && direction === "LEFT")
+				continue;
+			if (dir === "LEFT" && direction === "RIGHT")
+				continue;
+			stack.push([x+ deltaX, y + deltaY, direction, steps + 1]);
+		}
+	}
+	console.log(Math.max(...results));
+}
+
+// backtrackMaxSteps(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
+dfsMaxSteps(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);

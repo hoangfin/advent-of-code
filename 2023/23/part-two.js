@@ -10,35 +10,32 @@ const DIRECTION = {
 };
 
 const findLongestPath = (graph, startX, startY, endX, endY) => {
-
-	const queue = [];
-	const memo = new Map();
-	queue.push([startX, startY, "", 0]);
-	while (queue.length > 0) {
-		const [x, y, direction, steps] = queue.pop();
-		memo.set(`${x}-${y}-${direction}`, steps);
+	const stack = [];
+	const results = [];
+	stack.push([startX, startY, "", 0]);
+	while (stack.length > 0) {
+		const [x, y, dir, steps] = stack.pop();
 		if (x === endX && y === endY) {
-			console.log(steps);
+			results.push(steps);
+			continue;
 		}
-		for (const [dir, [deltaX, deltaY]] of Object.entries(DIRECTION)) {
+		for (const [direction, [deltaX, deltaY]] of Object.entries(DIRECTION)) {
 			const tile = graph[x + deltaX]?.[y + deltaY];
 			if (tile === undefined || tile === '#') {
 				continue;
 			}
-			if (direction === "UP" && dir === "DOWN")
+			if (dir === "UP" && direction === "DOWN")
 				continue;
-			if (direction === "DOWN" && dir === "UP")
+			if (dir === "DOWN" && direction === "UP")
 				continue;
-			if (direction === "RIGHT" && dir === "LEFT")
+			if (dir === "RIGHT" && direction === "LEFT")
 				continue;
-			if (direction === "LEFT" && dir === "RIGHT")
+			if (dir === "LEFT" && direction === "RIGHT")
 				continue;
-			if (memo.has(`${x + deltaX}-${y + deltaY}-${dir}`)) {
-				continue;
-			}
-			queue.push([x + deltaX, y + deltaY, dir, steps + 1]);
+			stack.push([x+ deltaX, y + deltaY, direction, steps + 1]);
 		}
 	}
+	console.log(Math.max(...results));
 }
 
 findLongestPath(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
