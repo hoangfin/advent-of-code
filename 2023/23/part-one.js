@@ -17,19 +17,19 @@ const backtrackMaxSteps = (graph, startX, startY, endX, endY) => {
 	let maxHikeSteps = 0;
 
 	const move = (graph, x, y, endX, endY, steps, visited) => {
-		if (x < 0 || x >= graph.length || y < 0 || y >= graph[0].length || visited[x][y] === 'O') {
-			return;
-		}
-
-		const tile = graph[x][y];
-		if (tile === '#') {
+		const tile = graph[x]?.[y];
+		if (tile === undefined || tile === '#' || visited[x][y] === 'O') {
 			return;
 		}
 
 		visited[x][y] = 'O';
 		steps++;
 		if (x === endX && y === endY) {
-			return steps;
+			if (maxHikeSteps < steps) {
+				maxHikeSteps = steps;
+			}
+			visited[x][y] = '.';
+			return;
 		}
 
 		for (const [deltaX, deltaY] of Object.values(DIRECTION)) {
@@ -48,7 +48,7 @@ const backtrackMaxSteps = (graph, startX, startY, endX, endY) => {
 
 	visited[startX][startY] = 'O';
 	move(graph, 1, 1, endX, endY, 0, visited);
-	visited[startX][startY] = false;
+	visited[startX][startY] = '.';
 	console.log(maxHikeSteps);
 }
 
@@ -89,5 +89,5 @@ const dfsMaxSteps = (graph, startX, startY, endX, endY) => {
 	console.log(Math.max(...results));
 }
 
-// backtrackMaxSteps(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
-dfsMaxSteps(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
+backtrackMaxSteps(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
+// dfsMaxSteps(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);

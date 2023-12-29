@@ -9,6 +9,41 @@ const DIRECTION = {
 	LEFT: [0, -1]
 };
 
+const backtrackMaxSteps = (graph, startX, startY, endX, endY) => {
+	const visited = Array.from(
+		{ length: graph.length },
+		() => new Array(graph[0].length).fill('.')
+	);
+	let maxHikeSteps = 0;
+
+	const move = (graph, x, y, endX, endY, steps, visited) => {
+		const tile = graph[x]?.[y];
+		if (tile === undefined || tile === '#' || visited[x][y] === 'O') {
+			return;
+		}
+
+		visited[x][y] = 'O';
+		steps++;
+		if (x === endX && y === endY) {
+			if (maxHikeSteps < steps) {
+				maxHikeSteps = steps;
+			}
+			visited[x][y] = '.';
+			return;
+		}
+
+		for (const [deltaX, deltaY] of Object.values(DIRECTION)) {
+			move(graph, x+ deltaX, y + deltaY, endX, endY, steps, visited);
+		}
+		visited[x][y] = '.';
+	}
+
+	visited[startX][startY] = 'O';
+	move(graph, 1, 1, endX, endY, 0, visited);
+	visited[startX][startY] = '.';
+	console.log(maxHikeSteps);
+}
+
 const findLongestPath = (graph, startX, startY, endX, endY) => {
 	const stack = [];
 	const results = [];
@@ -38,5 +73,6 @@ const findLongestPath = (graph, startX, startY, endX, endY) => {
 	console.log(Math.max(...results));
 }
 
-findLongestPath(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
+backtrackMaxSteps(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
+// findLongestPath(graph, 0, 1, graph.length - 1, graph.at(-1).length - 2);
 // console.log(graph[22][21]);
