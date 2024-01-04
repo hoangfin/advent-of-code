@@ -58,55 +58,93 @@ class Crucible {
 	}
 }
 
+// exports.partOne = (graph, startX, startY, endX, endY) => {
+// 	const queue = new Heap((a, b) => a.at(-1) - b.at(-1));
+// 	const visited = new Map();
+// 	let minHeatLoss = Number.POSITIVE_INFINITY;
+
+// 	const temp = graph[startX][startY];
+// 	graph[startX][startY] = 'S';
+// 	queue.push([startX, startY, "", 0, 0]);
+
+// 	while (queue.length > 0) {
+// 		const [x, y, direction, steps, g] = queue.pop();
+// 		const key = `${x}-${y}-${direction}-${steps}`;
+// 		if (x === endX && y === endY) {
+// 			console.log(g);
+// 			if (minHeatLoss > g)
+// 				minHeatLoss = g;
+// 		}
+// 		if (!visited.has(key)) {
+// 			visited.set(key, g);
+// 			for (const [nextDirection, [deltaX, deltaY]] of Object.entries(DIRECTION)) {
+// 				const heatLoss = graph[x + deltaX]?.[y + deltaY];
+// 				if (heatLoss === undefined || heatLoss === 'S')
+// 					continue;
+// 				if (direction === "UP" && nextDirection === "DOWN")
+// 					continue;
+// 				if (direction === "DOWN" && nextDirection === "UP")
+// 					continue;
+// 				if (direction === "RIGHT" && nextDirection === "LEFT")
+// 					continue;
+// 				if (direction === "LEFT" && nextDirection === "RIGHT")
+// 					continue;
+// 				const nextSteps = nextDirection === direction ? (steps + 1) : 1;
+// 				const nextG = g + parseInt(heatLoss);
+// 				if (nextSteps === 4)
+// 					continue;
+// 				if (!visited.has(`${x + deltaX}-${y + deltaY}-${nextDirection}-${nextSteps}`)) {
+// 					queue.push([
+// 						x + deltaX,
+// 						y + deltaY,
+// 						nextDirection,
+// 						nextSteps,
+// 						nextG
+// 					]);
+// 				}
+// 			}
+// 		}
+// 	}
+// 	graph[startX][startY] = temp;
+// 	return minHeatLoss;
+// };
+
 exports.partOne = (graph, startX, startY, endX, endY) => {
-
 	const queue = new Heap((a, b) => a.at(-1) - b.at(-1));
-	const visited = new Map();
-	let minHeatLoss = Number.POSITIVE_INFINITY;
+	const visited = Array.from({ length: graph.length }, () => []);
 
-	const temp = graph[startX][startY];
-	graph[startX][startY] = 'S';
+	visited[startX][startY] = 0;
 	queue.push([startX, startY, "", 0, 0]);
-
 	while (queue.length > 0) {
 		const [x, y, direction, steps, g] = queue.pop();
-		const key = `${x}-${y}-${direction}-${steps}`;
-		if (x === endX && y === endY) {
-			console.log(g);
-			if (minHeatLoss > g)
-				minHeatLoss = g;
+		if (visited[x]?.[y] && visited[x][y] < g) {
+			// console.log(`current g = ${g}, visited[${x}][${y}] === ${visited[x][y]}`);
+			continue;
 		}
-		if (!visited.has(key)) {
-			visited.set(key, g);
-			for (const [nextDirection, [deltaX, deltaY]] of Object.entries(DIRECTION)) {
-				const heatLoss = graph[x + deltaX]?.[y + deltaY];
-				if (heatLoss === undefined || heatLoss === 'S')
-					continue;
-				if (direction === "UP" && nextDirection === "DOWN")
-					continue;
-				if (direction === "DOWN" && nextDirection === "UP")
-					continue;
-				if (direction === "RIGHT" && nextDirection === "LEFT")
-					continue;
-				if (direction === "LEFT" && nextDirection === "RIGHT")
-					continue;
-				const nextSteps = nextDirection === direction ? (steps + 1) : 1;
-				const nextG = g + parseInt(heatLoss);
-				if (nextSteps === 4)
-					continue;
-				if (!visited.has(`${x + deltaX}-${y + deltaY}-${nextDirection}-${nextSteps}`)) {
-					queue.push([
-						x + deltaX,
-						y + deltaY,
-						nextDirection,
-						nextSteps,
-						nextG
-					]);
-				}
+		if (x === endX && y === endY) {
+			return g;
+		}
+		for (const [nextDirection, [deltaX, deltaY]] of Object.entries(DIRECTION)) {
+			const heatLoss = graph[x + deltaX]?.[y + deltaY];
+			if (heatLoss === undefined)
+				continue;
+			const nextSteps = nextDirection === direction ? (steps + 1) : 1;
+			if (nextSteps === 4)
+				continue;
+			const nextG = g + parseInt(heatLoss);
+			if (!visited[x + deltaX][y + deltaY]) {
+				visited[x + deltaX][y + deltaY] = nextG;
+				queue.push([x + deltaX, y + deltaY, nextDirection, nextSteps, nextG]);
+				continue;
+			}
+			if (visited[x + deltaX][y + deltaY] > nextG) {
+				console.log(`current nextG = ${nextG}, visited[${x + deltaX}][${y + deltaY}] === ${visited[x + deltaX][y + deltaY]}`);
+				visited[x + deltaX][y + deltaY] = nextG;
+				queue.push([x + deltaX, y + deltaY, nextDirection, nextSteps, nextG]);
 			}
 		}
+		// console.log(queue);
 	}
-	graph[startX][startY] = temp;
 	return minHeatLoss;
 };
 
