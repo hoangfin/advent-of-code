@@ -111,14 +111,14 @@ class Crucible {
 
 exports.partOne = (graph, startX, startY, endX, endY) => {
 	const queue = new Heap((a, b) => a.at(-1) - b.at(-1));
-	const visited = Array.from({ length: graph.length }, () => []);
+	const visited = new Map();
 
-	visited[startX][startY] = 0;
-	queue.push([startX, startY, "", 0, 0]);
+	const temp = graph[startX][startY];
+	graph[startX][startY] = 'S';
+	queue.push([startX, startY, "", 0, 0,]);
 	while (queue.length > 0) {
 		const [x, y, direction, steps, g] = queue.pop();
-		if (visited[x]?.[y] && visited[x][y] < g) {
-			// console.log(`current g = ${g}, visited[${x}][${y}] === ${visited[x][y]}`);
+		if (visited.get(`${x}-${y}-${direction}-${steps}`) > g) {
 			continue;
 		}
 		if (x === endX && y === endY) {
@@ -126,26 +126,35 @@ exports.partOne = (graph, startX, startY, endX, endY) => {
 		}
 		for (const [nextDirection, [deltaX, deltaY]] of Object.entries(DIRECTION)) {
 			const heatLoss = graph[x + deltaX]?.[y + deltaY];
-			if (heatLoss === undefined)
+			if (heatLoss === undefined || heatLoss === 'S')
+				continue;
+			if (direction === "UP" && nextDirection === "DOWN")
+				continue;
+			if (direction === "DOWN" && nextDirection === "UP")
+				continue;
+			if (direction === "RIGHT" && nextDirection === "LEFT")
+				continue;
+			if (direction === "LEFT" && nextDirection === "RIGHT")
 				continue;
 			const nextSteps = nextDirection === direction ? (steps + 1) : 1;
 			if (nextSteps === 4)
 				continue;
 			const nextG = g + parseInt(heatLoss);
-			if (!visited[x + deltaX][y + deltaY]) {
-				visited[x + deltaX][y + deltaY] = nextG;
+			if (!visited.has(`${x + deltaX}-${y + deltaY}-${nextDirection}-${nextSteps}`)) {
+				visited.set(`${x + deltaX}-${y + deltaY}-${nextDirection}-${nextSteps}`, nextG);
 				queue.push([x + deltaX, y + deltaY, nextDirection, nextSteps, nextG]);
 				continue;
 			}
-			if (visited[x + deltaX][y + deltaY] > nextG) {
-				console.log(`current nextG = ${nextG}, visited[${x + deltaX}][${y + deltaY}] === ${visited[x + deltaX][y + deltaY]}`);
-				visited[x + deltaX][y + deltaY] = nextG;
+			console.log(`${x + deltaX}-${y + deltaY}-${nextDirection}-${nextSteps} hit`);
+			if (visited.get(`${x + deltaX}-${y + deltaY}-${nextDirection}-${nextSteps}`) > nextG) {
+				// console.log(`${x + deltaX}-${y + deltaY}-${nextDirection}-${nextSteps} hit`);
+				visited.set(`${x + deltaX}-${y + deltaY}-${nextDirection}-${nextSteps}`, nextG);
 				queue.push([x + deltaX, y + deltaY, nextDirection, nextSteps, nextG]);
 			}
 		}
-		// console.log(queue);
 	}
-	return minHeatLoss;
+	graph[startX][startY] = temp;
+	return Number.POSITIVE_INFINITY;
 };
 
 exports.partTwo = (graph, startX, startY, endX, endY) => {
@@ -181,3 +190,4 @@ exports.partTwo = (graph, startX, startY, endX, endY) => {
 	}
 	return minHeatLoss;
 };
+

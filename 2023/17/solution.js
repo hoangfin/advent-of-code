@@ -1,5 +1,5 @@
 const { input: lines } = require("./input");
-// const { findLeastHeatLoss } = require("./backtracking");
+// const { partOne, partTwo } = require("./backtracking");
 const { partOne, partTwo } = require("./dijkstra");
 
 const graph = Array.from(lines, line => line.split(""));

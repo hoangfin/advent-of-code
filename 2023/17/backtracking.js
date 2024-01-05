@@ -5,48 +5,41 @@ const DIRECTION = {
 	LEFT: [0, -1]
 };
 
-exports.findLeastHeatLoss = (graph, startX, startY, endX, endY) => {
-	const visited = Array.from(
+exports.partOne = (graph, startX, startY, endX, endY) => {
+	const path = Array.from(
 		{ length: graph.length },
 		() => new Array(graph[0].length).fill('.')
 	);
 	let minHeatLoss = Number.POSITIVE_INFINITY;
 
-	const isValidMove = (graph, x, y, visited) => {
-		if (x < 0 || x >= graph.length || y < 0 || y >= graph[0].length) {
-			return false;
-		}
-		if (visited[x][y] === 'O') {
-			return false;
-		}
-		// for (let i = 1; i <= 3; i++) {
-		// 	if (visited[x + i]?.[y] === 'O' || visited[x - i]?.[y] === 'O')
-		// }
-		return true;
-	};
-
-	const move = (graph, x, y, endX, endY, g, visited) => {
-		visited[x][y] = 'O';
+	const move = (graph, x, y, direction, steps, g, path) => {
 		g += parseInt(graph[x][y]);
+		path[x][y] = 'O';
 		if (x === endX && y === endY) {
 			if (minHeatLoss > g) {
 				minHeatLoss = g;
 			}
-			visited[x][y] = '.';
+			path[x][y] = '.';
 			return;
 		}
 
-		for (const [deltaX, deltaY] of Object.values(DIRECTION)) {
-			if (isValidMove(graph, x + deltaX, y + deltaY, visited)) {
-				move(graph, x + deltaX, y + deltaY, endX, endY, g, visited);
+		for (const [nextDirection, [deltaX, deltaY]] of Object.entries(DIRECTION)) {
+			const heatLoss = graph[x + deltaX]?.[y + deltaY];
+			if (!heatLoss || g > minHeatLoss || path[x + deltaX][y + deltaY] === 'O') {
+				continue;
 			}
+			const nextSteps = direction === nextDirection ? (steps + 1) : 1;
+			if (nextSteps === 4) {
+				continue;
+			}
+			move(graph, x + deltaX, y + deltaY, nextDirection, nextSteps, g, path);
 		}
-		visited[x][y] = '.';
+		path[x][y] = '.';
 	}
 
-	visited[startX][startY] = 'O';
-	move(graph, 0, 1, endX, endY, 0, visited);
-	move(graph, 1, 0, endX, endY, 0, visited);
-	visited[startX][startY] = '.';
-	console.log(minHeatLoss);
+	path[startX][startY] = 'O';
+	move(graph, 0, 1, "RIGHT", 1, 0, path);
+	move(graph, 1, 0, "DOWN", 1, 0, path);
+	path[startX][startY] = '.';
+	return minHeatLoss;
 }
